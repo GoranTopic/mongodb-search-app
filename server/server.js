@@ -5,6 +5,7 @@ const RegistoSocialQuery = require('./RegistroSocialQuery');
 const CNEQuery = require('./CNEQuery');
 const ANTQuery = require('./ANTQuery');
 const ProcesosJudicialesQuery = require('./ProcesosJudicialesQuery');
+const SuperciasCompanyQuery = require('./SuperciasCompanyQuery');
 
 const app = express();
 const PORT = 5000;
@@ -18,17 +19,19 @@ let endpoint_vpn = 'mongodb://10.0.10.5:27017'
 let endpoint = endpoint_vpn
 
 // Declare the instance outside so it can be reused
-let superciasQuery, registoSocialQuery, cneQuery, antQuery, processJudicialesQuery;
+let superciasQuery, registoSocialQuery, cneQuery, antQuery, processJudicialesQuery, superciasCompanyQuery;
 
 // Initialize the MongoDB connection once when the server starts
 (async () => {
   superciasQuery = new SuperciasQuery(endpoint);
+  superciasCompanyQuery = new SuperciasCompanyQuery(endpoint);
   registoSocialQuery = new RegistoSocialQuery(endpoint);
   cneQuery = new CNEQuery(endpoint);
   antQuery = new ANTQuery(endpoint);
   processJudicialesQuery = new ProcesosJudicialesQuery(endpoint);
   // Connect to MongoDB
   await superciasQuery.connect(); // Connect once when the server starts
+  await superciasCompanyQuery.connect();
   await registoSocialQuery.connect();
   await cneQuery.connect();
   await antQuery.connect();
@@ -56,8 +59,17 @@ app.post('/search', async (req, res) => {
         // change query to all uppercaseo
         const upper_query = query.toUpperCase();
         result['supercias'] = await superciasQuery.findByNombre(upper_query);
+        console.log('supercias done');
         result['cne'] = await cneQuery.findByNombre(upper_query);
+        console.log('cne done');
         result['ant'] = await antQuery.findByNombre(upper_query);
+        console.log('ant done');
+      }
+      else if (searchType === 'ruc') {
+        result['supercias'] = (await superciasCompanyQuery.findByRuc(query))[0];
+        console.log('supercias done');
+        result['ant'] = (await antQuery.findByCedula(query))[0];
+        console.log('ant done');
       }
     }
     // for result in cursor:

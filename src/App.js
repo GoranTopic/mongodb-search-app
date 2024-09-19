@@ -67,6 +67,14 @@ function App() {
             onChange={() => setSearchType('nombre')}
           />
           <label htmlFor="nombre">Nombre</label>
+          <input 
+            type="radio"
+            id="ruc"
+            name="searchType"
+            value="ruc"
+            onChange={() => setSearchType('ruc')}
+          />
+          <label htmlFor="ruc">RUC</label>
         </div>
         <button onClick={handleSearch}>Search</button>
       </div>
